@@ -3717,6 +3717,10 @@ void GLCanvas3D::on_key(wxKeyEvent& evt)
                     }
                 }
 
+                // Reload all from disk with F5
+                if (keyCode == WXK_F5 && !evt.HasAnyModifiers() && m_canvas_type == CanvasView3D)
+                    post_event(SimpleEvent(EVT_GLCANVAS_RELOAD_FROM_DISK));
+
                 // BBS: add select view logic
                 if (evt.ControlDown()) {
                     switch (keyCode) {

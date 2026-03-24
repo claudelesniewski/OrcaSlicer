@@ -1614,7 +1614,7 @@ void MenuFactory::create_plate_menu()
 
     // reload all objects on current plate
     append_menu_item(
-        menu, wxID_ANY, _L("Reload All") + "\tCtrl+Shift+R", _L("Reload all from disk"),
+        menu, wxID_ANY, _L("Reload All") + "\tF5", _L("Reload all from disk"),
         [](wxCommandEvent&) {
             PartPlate* plate = plater()->get_partplate_list().get_selected_plate();
             assert(plate);
