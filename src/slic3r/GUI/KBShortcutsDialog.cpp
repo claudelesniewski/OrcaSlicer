@@ -259,6 +259,7 @@ void KBShortcutsDialog::fill_shortcuts()
             { "E", L("Gizmo brim ears") },
             { "I", L("Zoom in") },
             { "O", L("Zoom out") },
+            { ctrl + shift + "R", L("Reload all from disk") },
             { L("Tab"), L("Switch between Prepare/Preview") },
 
         };

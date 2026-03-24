@@ -3747,6 +3747,10 @@ void GLCanvas3D::on_key(wxKeyEvent& evt)
                         case '7':
                         case WXK_NUMPAD7: //7 on numpad
                             { select_plate(); break; }
+                        case 'R':
+                            if (evt.ShiftDown() && m_canvas_type == CanvasView3D)
+                                post_event(SimpleEvent(EVT_GLCANVAS_RELOAD_FROM_DISK));
+                            break;
                         default: break;
                     }
                 }
