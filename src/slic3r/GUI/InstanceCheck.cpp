@@ -59,6 +59,7 @@ namespace instance_check_internal
 	{
 		std::optional<bool>	should_send;
 		std::string    		cl_string;
+		bool                reload_all { false };
 	};
 	static CommandLineAnalysis process_command_line(int argc, char** argv)
 	{
@@ -73,7 +74,11 @@ namespace instance_check_internal
 				ret.should_send = true;
 			else if (token == "--no-single-instance")
 				ret.should_send = false;
-			else
+			else if (token == "--reload-all") {
+				ret.reload_all = true;
+				ret.should_send = true; // always try to forward to running instance
+				arguments.emplace_back(token);
+			} else
 				arguments.emplace_back(token);
 		} 
 		ret.cl_string = escape_strings_cstyle(arguments);
@@ -360,8 +365,14 @@ bool instance_check(int argc, char** argv, bool app_config_single_instance)
 			<< lock_name << ".lock";
 		return true;
 	}
+	// --reload-all was requested but no running instance was found; exit cleanly.
+	if (cla.reload_all) {
+		BOOST_LOG_TRIVIAL(info) << "--reload-all: no running OrcaSlicer instance found, exiting.";
+		return true;
+	}
+
 	BOOST_LOG_TRIVIAL(info) << "Instance check: Another instance not found or single-instance not set.";
-	
+
 	return false;
 }
 
@@ -371,6 +382,7 @@ namespace GUI {
 wxDEFINE_EVENT(EVT_LOAD_MODEL_OTHER_INSTANCE, LoadFromOtherInstanceEvent);
 wxDEFINE_EVENT(EVT_START_DOWNLOAD_OTHER_INSTANCE, StartDownloadOtherInstanceEvent);
 wxDEFINE_EVENT(EVT_INSTANCE_GO_TO_FRONT, InstanceGoToFrontEvent);
+wxDEFINE_EVENT(EVT_RELOAD_ALL_OTHER_INSTANCE, ReloadAllOtherInstanceEvent);
 
 void OtherInstanceMessageHandler::init(wxEvtHandler* callback_evt_handler)
 {
@@ -506,6 +518,11 @@ void OtherInstanceMessageHandler::handle_message(const std::string& message)
 	// Skip the first argument, it is the path to the slicer executable.
 	auto it = args.begin();
 	for (++ it; it != args.end(); ++ it) {
+		if (*it == "--reload-all") {
+			BOOST_LOG_TRIVIAL(info) << "Received --reload-all from other instance.";
+			wxPostEvent(m_callback_evt_handler, ReloadAllOtherInstanceEvent(GUI::EVT_RELOAD_ALL_OTHER_INSTANCE));
+			return;
+		}
 		boost::filesystem::path p = MessageHandlerInternal::get_path(*it);
 		if (! p.string().empty())
 			paths.emplace_back(p);

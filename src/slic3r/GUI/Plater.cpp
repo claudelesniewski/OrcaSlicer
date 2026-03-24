@@ -5314,6 +5314,10 @@ Plater::priv::priv(Plater *q, MainFrame *main_frame)
     this->q->Bind(EVT_INSTANCE_GO_TO_FRONT, [this](InstanceGoToFrontEvent &) {
         bring_instance_forward();
     });
+    this->q->Bind(EVT_RELOAD_ALL_OTHER_INSTANCE, [this](ReloadAllOtherInstanceEvent &) {
+        BOOST_LOG_TRIVIAL(info) << "Reloading all from disk (triggered by external --reload-all).";
+        this->reload_all_from_disk();
+    });
     wxGetApp().other_instance_message_handler()->init(this->q);
 
     // collapse sidebar according to saved value
